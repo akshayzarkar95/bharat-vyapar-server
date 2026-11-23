@@ -1,18 +1,18 @@
-import { db } from "@/db";
-import { sql } from "drizzle-orm";
+const rawUrl = process.env.DATABASE_URL;
 
-export const dynamic = "force-dynamic";
-
-export async function GET() {
+if (!rawUrl) {
+  console.error("DATABASE_URL is missing");
+} else {
   try {
-    await db.execute(sql`select 1`);
-    return Response.json({ ok: true });
-  } catch (error) {
-    console.error("Database health check failed:", error);
+    const parsed = new URL(rawUrl);
 
-    return Response.json(
-      { ok: false, error: "Database connection failed" },
-      { status: 500 }
-    );
+    console.log("DB connection config:", {
+      hostname: parsed.hostname,
+      port: parsed.port,
+      database: parsed.pathname,
+      sslmode: parsed.searchParams.get("sslmode"),
+    });
+  } catch {
+    console.error("DATABASE_URL is invalid");
   }
 }
